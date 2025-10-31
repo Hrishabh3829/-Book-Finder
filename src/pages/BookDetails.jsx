@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import Header from "../components/Header";
+import { motion } from "motion/react";
 
 function normalizeDescription(desc) {
   if (!desc) return "No description available.";
@@ -11,7 +12,7 @@ function normalizeDescription(desc) {
 }
 
 const BookDetails = () => {
-  const { id } = useParams(); // works id like OL12345W
+  const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [data, setData] = useState(null);
@@ -47,22 +48,62 @@ const BookDetails = () => {
   const firstPublished = data.first_publish_date || data.first_publish_year;
 
   return (
-    <div className="details-page">
+    <motion.div 
+      className="details-page"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
       <Header />
-      <h2 className="page-title">{title}</h2>
-      {firstPublished ? <p className="details-meta">First published: {firstPublished}</p> : null}
-      <p className="details-desc">{description}</p>
+      <motion.h2 
+        className="page-title"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+      >
+        {title}
+      </motion.h2>
+      {firstPublished ? (
+        <motion.p 
+          className="details-meta"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          First published: {firstPublished}
+        </motion.p>
+      ) : null}
+      <motion.p 
+        className="details-desc"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        {description}
+      </motion.p>
       {subjects.length ? (
-        <div className="details-subjects">
+        <motion.div 
+          className="details-subjects"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
           <strong>Subjects:</strong>
           <ul>
-            {subjects.slice(0, 16).map((s) => (
-              <li key={s}>{s}</li>
+            {subjects.slice(0, 16).map((s, index) => (
+              <motion.li 
+                key={s}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 + index * 0.02 }}
+              >
+                {s}
+              </motion.li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       ) : null}
-    </div>
+    </motion.div>
   );
 };
 

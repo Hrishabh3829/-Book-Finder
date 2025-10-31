@@ -2,19 +2,32 @@ import { useContext } from "react";
 import { FavoritesContext } from "../context/FavoritesContext";
 import BookList from "../components/BookList";
 import Header from "../components/Header";
+import { motion } from "motion/react";
 
 const Favorites = () => {
   const { favorites } = useContext(FavoritesContext);
   return (
-    <div className="app-container">
+    <motion.div 
+      className="app-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <Header />
-      <h2 className="page-title">⭐ Favorites</h2>
+      <motion.h2 
+        className="page-title"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+      >
+        ⭐ Favorites
+      </motion.h2>
       {favorites.length === 0 ? (
         <p className="empty-text">No favorites yet. Add some books you love.</p>
       ) : (
         <BookList books={favorites} />
       )}
-    </div>
+    </motion.div>
   );
 };
 

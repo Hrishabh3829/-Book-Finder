@@ -1,20 +1,19 @@
 import { useContext, useState } from "react";
 import SearchBar from "../components/SearchBar";
-import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import BookList from "../components/BookList";
 import Spinner from "../components/Spinner";
 import Modal from "../components/Modal";
+import BrowseDropdown from "../components/BrowseDropdown";
 import { useBooks } from "../hooks/useBooks";
 import { SearchContext } from "../context/SearchContext";
+import { motion, AnimatePresence } from "motion/react";
 
 const Home = () => {
-  const { query, setQuery, filters, setFilters, resetFilters, recent, addRecent, clearRecent, dark, toggleDark, resetSearch } =
-    useContext(SearchContext);
+  const { query, setQuery, filters, setFilters, resetFilters, recent, addRecent, clearRecent } = useContext(SearchContext);
 
   const { books, loading, error, fetchDetails } = useBooks();
 
-  // Modal state for details
   const [details, setDetails] = useState({ open: false, loading: false, data: null });
   const openDetails = async (book) => {
     setDetails({ open: true, loading: true, data: null });
@@ -26,9 +25,7 @@ const Home = () => {
   const [browseOpen, setBrowseOpen] = useState(false);
 
   return (
-    <div className={`layout ${browseOpen ? "" : "sidebar-collapsed"}`}>
-      <Sidebar />
-      <main className="main">
+    <div className="app-container">
       <Header />
 
       <SearchBar
@@ -46,7 +43,6 @@ const Home = () => {
         onClearRecent={clearRecent}
       />
 
-      {/* Filters */}
       <FiltersSection
         filters={filters}
         setFilters={setFilters}
@@ -57,18 +53,35 @@ const Home = () => {
       />
 
       {loading ? (
-        <div className="center">
+        <motion.div 
+          className="center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
           <Spinner />
-        </div>
+        </motion.div>
       ) : error ? (
-        <p className="error-text" role="alert">{error}</p>
+        <motion.p 
+          className="error-text" 
+          role="alert"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          {error}
+        </motion.p>
       ) : query.trim() && books.length === 0 ? (
-        <p className="empty-text" role="status">No results for '{query}'. Try another title or adjust filters.</p>
+        <motion.p 
+          className="empty-text" 
+          role="status"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          No results for '{query}'. Try another title or adjust filters.
+        </motion.p>
       ) : (
         <BookList books={books} onSelect={openDetails} />
       )}
-
-  {/* Pagination removed: all results limited to first set only */}
 
       <Modal open={details.open} title={details.data?.title || "Book details"} onClose={closeDetails}>
         {details.loading ? (
@@ -94,14 +107,12 @@ const Home = () => {
           <p>Details not available.</p>
         )}
       </Modal>
-      </main>
     </div>
   );
 };
 
 export default Home;
 
-// Inline component for neatness
 const FiltersSection = ({ filters, setFilters, resetFilters, resultCount, browseOpen, setBrowseOpen }) => {
   const [open, setOpen] = useState(false);
 
@@ -115,134 +126,175 @@ const FiltersSection = ({ filters, setFilters, resetFilters, resultCount, browse
   return (
     <section className="filters-wrap" aria-label="Filters">
       <div className="filters-top">
-        <div className="filters-left">
-          <button
+        <div className="filters-left" style={{ position: 'relative' }}>
+          <motion.button
             id="browse-toggle"
             className="filters-toggle browse-toggle"
             onClick={() => setBrowseOpen(!browseOpen)}
             aria-expanded={browseOpen}
             aria-controls="sidebar"
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
           >
             <span className="caret" aria-hidden>▾</span>
-            <span>Browse</span>
-          </button>
-          <button
+            <span>📚 Browse</span>
+          </motion.button>
+          
+          <BrowseDropdown isOpen={browseOpen} onClose={() => setBrowseOpen(false)} />
+          <motion.button
             id="filters-toggle"
             className="filters-toggle"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-controls="filters-panel"
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
           >
             <span className="caret" aria-hidden>▾</span>
             <span className="filters-toggle-text">Filters</span>
-          </button>
+          </motion.button>
           <span className="results-count"><strong>{resultCount}</strong> results</span>
         </div>
         <div className="filters-right">
           {activeChips.length > 0 && (
-            <div className="active-chips" aria-label="Active filters">
-              {activeChips.map((c) => (
-                <button key={c.key} className="chip chip-remove" onClick={c.clear} aria-label={`Remove ${c.label}`}>
+            <motion.div 
+              className="active-chips" 
+              aria-label="Active filters"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              {activeChips.map((c, index) => (
+                <motion.button 
+                  key={c.key} 
+                  className="chip chip-remove" 
+                  onClick={c.clear} 
+                  aria-label={`Remove ${c.label}`}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2, delay: index * 0.03 }}
+                >
                   {c.label} ×
-                </button>
+                </motion.button>
               ))}
-              <button className="chip chip-clearall" onClick={resetFilters}>Clear all</button>
-            </div>
+              <motion.button 
+                className="chip chip-clearall" 
+                onClick={resetFilters}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Clear all
+              </motion.button>
+            </motion.div>
           )}
         </div>
       </div>
 
-      {open && (
-        <div id="filters-panel" className="filters-panel" role="region" aria-labelledby="filters-toggle">
-          <div className="filters-grid">
-            <div className="filters-col">
-              <label className="filter-inline">
-                <input
-                  type="checkbox"
-                  checked={filters.onlyWithCover}
-                  onChange={(e) => setFilters({ ...filters, onlyWithCover: e.target.checked })}
-                />
-                <span>Only show books with cover images</span>
-              </label>
-
-              <label className="filter-item" htmlFor="authorInput">
-                Author
-                <input
-                  id="authorInput"
-                  type="text"
-                  value={filters.author}
-                  onChange={(e) => setFilters({ ...filters, author: e.target.value })}
-                  className="filter-input"
-                  placeholder="e.g., Tolkien"
-                />
-              </label>
-
-              <label className="filter-item" htmlFor="language">
-                Language
-                <select
-                  id="language"
-                  className="filter-select"
-                  value={filters.language}
-                  onChange={(e) => setFilters({ ...filters, language: e.target.value })}
-                >
-                  <option value="">Any</option>
-                  <option value="eng">English</option>
-                  <option value="hin">Hindi</option>
-                  <option value="spa">Spanish</option>
-                  <option value="fra">French</option>
-                  <option value="deu">German</option>
-                  <option value="ita">Italian</option>
-                </select>
-              </label>
-            </div>
-
-            <div className="filters-col">
-              <div className="filter-row">
-                <label className="filter-item" htmlFor="yearFrom">
-                  Year from
+      <AnimatePresence>
+        {open && (
+          <motion.div 
+            id="filters-panel" 
+            className="filters-panel" 
+            role="region" 
+            aria-labelledby="filters-toggle"
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={{ opacity: 1, height: "auto", y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
+            <div className="filters-grid">
+              <div className="filters-col">
+                <label className="filter-inline">
                   <input
-                    id="yearFrom"
-                    type="number"
-                    inputMode="numeric"
-                    min="0"
-                    value={filters.yearFrom}
-                    onChange={(e) => setFilters({ ...filters, yearFrom: e.target.value })}
+                    type="checkbox"
+                    checked={filters.onlyWithCover}
+                    onChange={(e) => setFilters({ ...filters, onlyWithCover: e.target.checked })}
+                  />
+                  <span>Only show books with cover images</span>
+                </label>
+
+                <label className="filter-item" htmlFor="authorInput">
+                  Author
+                  <input
+                    id="authorInput"
+                    type="text"
+                    value={filters.author}
+                    onChange={(e) => setFilters({ ...filters, author: e.target.value })}
                     className="filter-input"
-                    placeholder="e.g., 1990"
+                    placeholder="e.g., Tolkien"
                   />
                 </label>
-                <label className="filter-item" htmlFor="yearTo">
-                  Year to
-                  <input
-                    id="yearTo"
-                    type="number"
-                    inputMode="numeric"
-                    min="0"
-                    value={filters.yearTo}
-                    onChange={(e) => setFilters({ ...filters, yearTo: e.target.value })}
-                    className="filter-input"
-                    placeholder="e.g., 2020"
-                  />
+
+                <label className="filter-item" htmlFor="language">
+                  Language
+                  <select
+                    id="language"
+                    className="filter-select"
+                    value={filters.language}
+                    onChange={(e) => setFilters({ ...filters, language: e.target.value })}
+                  >
+                    <option value="">Any</option>
+                    <option value="eng">English</option>
+                    <option value="hin">Hindi</option>
+                    <option value="spa">Spanish</option>
+                    <option value="fra">French</option>
+                    <option value="deu">German</option>
+                    <option value="ita">Italian</option>
+                  </select>
                 </label>
               </div>
 
-              <label className="filter-item" htmlFor="sortYear">
-                Sort by publication year
-                <select
-                  id="sortYear"
-                  value={filters.sortByYear}
-                  onChange={(e) => setFilters({ ...filters, sortByYear: e.target.value })}
-                  className="filter-select"
-                >
-                  <option value="">None</option>
-                  <option value="asc">Ascending</option>
-                  <option value="desc">Descending</option>
-                </select>
-              </label>
+              <div className="filters-col">
+                <div className="filter-row">
+                  <label className="filter-item" htmlFor="yearFrom">
+                    Year from
+                    <input
+                      id="yearFrom"
+                      type="number"
+                      inputMode="numeric"
+                      min="0"
+                      value={filters.yearFrom}
+                      onChange={(e) => setFilters({ ...filters, yearFrom: e.target.value })}
+                      className="filter-input"
+                      placeholder="e.g., 1990"
+                    />
+                  </label>
+                  <label className="filter-item" htmlFor="yearTo">
+                    Year to
+                    <input
+                      id="yearTo"
+                      type="number"
+                      inputMode="numeric"
+                      min="0"
+                      value={filters.yearTo}
+                      onChange={(e) => setFilters({ ...filters, yearTo: e.target.value })}
+                      className="filter-input"
+                      placeholder="e.g., 2020"
+                    />
+                  </label>
+                </div>
+
+                <label className="filter-item" htmlFor="sortYear">
+                  Sort by publication year
+                  <select
+                    id="sortYear"
+                    value={filters.sortByYear}
+                    onChange={(e) => setFilters({ ...filters, sortByYear: e.target.value })}
+                    className="filter-select"
+                  >
+                    <option value="">None</option>
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                  </select>
+                </label>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

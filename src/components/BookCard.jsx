@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { FavoritesContext } from "../context/FavoritesContext";
+import { motion } from "motion/react";
 
 const BookCard = ({ book, onSelect }) => {
   const coverUrl = book.cover_i
@@ -12,17 +13,23 @@ const BookCard = ({ book, onSelect }) => {
   const fav = isFav?.(book.key);
 
   return (
-    <div
+    <motion.div
       className="book-card"
       role="button"
       tabIndex={0}
       onClick={() => onSelect?.(book)}
       onKeyDown={(e) => (e.key === "Enter" ? onSelect?.(book) : null)}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
     >
-      <img
+      <motion.img
         src={coverUrl}
         alt={`Cover of ${book.title}${book.author_name ? ` by ${book.author_name[0]}` : ""}`}
         className="book-cover"
+        whileHover={{ scale: 1.03 }}
+        transition={{ duration: 0.3 }}
       />
       <h3 className="book-title">
         <Link to={`/book/${workId}`} className="book-link-title">{book.title}</Link>
@@ -67,7 +74,7 @@ const BookCard = ({ book, onSelect }) => {
         </button>
         <Link to={`/book/${workId}`} className="book-link">View details →</Link>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

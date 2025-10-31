@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
-// Props:
-// - value: string (controlled)
-// - onImmediateSearch(query): called on submit button
-// - onDebouncedChange(query): called after 500ms inactivity
-// - recent: string[]
-// - onPickRecent(query)
-// - onClearRecent()
 const SearchBar = ({
   value = "",
   onImmediateSearch,
@@ -20,7 +14,6 @@ const SearchBar = ({
 
   useEffect(() => setQuery(value), [value]);
 
-  // debounce 500ms
   useEffect(() => {
     const id = setTimeout(() => {
       if (query.trim() !== lastEmitted.current.trim()) {
@@ -39,42 +32,76 @@ const SearchBar = ({
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="search-container" role="search" aria-label="Book search">
-        <input
+      <motion.form 
+        onSubmit={handleSubmit} 
+        className="search-container" 
+        role="search" 
+        aria-label="Book search"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+      >
+        <motion.input
           type="text"
           placeholder="Search for books..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="search-input"
           aria-label="Search books by title"
+          whileFocus={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
         />
-        <button type="submit" className="search-btn">
+        <motion.button 
+          type="submit" 
+          className="search-btn"
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.2 }}
+        >
           Search
-        </button>
-      </form>
+        </motion.button>
+      </motion.form>
 
-      {recent?.length ? (
-        <div className="recent-bar" aria-label="Recent searches">
-          {recent.map((r) => (
-            <button
-              key={r}
-              className="chip"
-              onClick={() => onPickRecent?.(r)}
-              type="button"
-            >
-              {r}
-            </button>
-          ))}
-          <button
-            className="chip chip-clear"
-            onClick={onClearRecent}
-            type="button"
-            aria-label="Clear recent searches"
+      <AnimatePresence>
+        {recent?.length ? (
+          <motion.div 
+            className="recent-bar" 
+            aria-label="Recent searches"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            Clear
-          </button>
-        </div>
-      ) : null}
+            {recent.map((r, index) => (
+              <motion.button
+                key={r}
+                className="chip"
+                onClick={() => onPickRecent?.(r)}
+                type="button"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.2, delay: index * 0.05 }}
+              >
+                {r}
+              </motion.button>
+            ))}
+            <motion.button
+              className="chip chip-clear"
+              onClick={onClearRecent}
+              type="button"
+              aria-label="Clear recent searches"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              Clear
+            </motion.button>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 };

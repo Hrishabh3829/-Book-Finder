@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { SearchContext } from "../context/SearchContext";
+import { motion } from "motion/react";
 
 const Header = () => {
   const { dark, toggleDark, resetSearch } = useContext(SearchContext);
@@ -9,7 +10,12 @@ const Header = () => {
   const showBack = location.pathname !== "/";
 
   return (
-    <header className="app-header">
+    <motion.header 
+      className="app-header"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
       <div className="header-left">
         {showBack && (
           <button
@@ -34,10 +40,18 @@ const Header = () => {
           </Link>
         </h1>
       </div>
-      <button className="theme-toggle" onClick={toggleDark} aria-pressed={dark} aria-label="Toggle dark mode">
+      <motion.button 
+        className="theme-toggle" 
+        onClick={toggleDark} 
+        aria-pressed={dark} 
+        aria-label="Toggle dark mode"
+        whileHover={{ scale: 1.05, y: -2 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+      >
         {dark ? "🌞 Light" : "🌙 Dark"}
-      </button>
-    </header>
+      </motion.button>
+    </motion.header>
   );
 };
 

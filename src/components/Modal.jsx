@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
 const Modal = ({ open, title, children, onClose }) => {
   const previouslyFocused = useRef(null);
@@ -7,12 +8,10 @@ const Modal = ({ open, title, children, onClose }) => {
   useEffect(() => {
     if (!open) return;
     previouslyFocused.current = document.activeElement;
-    // Focus the close button for accessibility
     closeBtnRef.current?.focus?.();
     const onKey = (e) => {
       if (e.key === "Escape") onClose?.();
       if (e.key === "Tab") {
-        // basic focus trap within modal
         const focusable = Array.from(
           document.querySelectorAll(
             ".modal button, .modal a, .modal input, .modal select, .modal textarea, .modal [tabindex]:not([tabindex='-1'])"
@@ -40,17 +39,44 @@ const Modal = ({ open, title, children, onClose }) => {
   if (!open) return null;
   const titleId = "modal-title";
   return (
-    <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
-      <div className="modal">
-        <div className="modal-header">
-          <h2 className="modal-title" id={titleId}>{title}</h2>
-          <button ref={closeBtnRef} className="modal-close" onClick={onClose} aria-label="Close modal">
-            ✕
-          </button>
-        </div>
-        <div className="modal-body">{children}</div>
-      </div>
-    </div>
+    <AnimatePresence>
+      <motion.div 
+        className="modal-overlay" 
+        role="dialog" 
+        aria-modal="true" 
+        aria-labelledby={titleId}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        onClick={onClose}
+      >
+        <motion.div 
+          className="modal"
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="modal-header">
+            <h2 className="modal-title" id={titleId}>{title}</h2>
+            <motion.button 
+              ref={closeBtnRef} 
+              className="modal-close" 
+              onClick={onClose} 
+              aria-label="Close modal"
+              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+            >
+              ✕
+            </motion.button>
+          </div>
+          <div className="modal-body">{children}</div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

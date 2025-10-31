@@ -3,7 +3,6 @@ import { createContext, useCallback, useEffect, useMemo, useState } from "react"
 export const SearchContext = createContext(null);
 
 export function SearchProvider({ children }) {
-  // Search state
   const [query, setQuery] = useState("");
   const defaultFilters = {
     onlyWithCover: false,
@@ -11,11 +10,10 @@ export function SearchProvider({ children }) {
     author: "",
     yearFrom: "",
     yearTo: "",
-    language: "", // ISO-3 codes used by OpenLibrary like 'eng', 'hin'
+    language: "",
   };
   const [filters, setFilters] = useState(defaultFilters);
 
-  // Recent searches
   const [recent, setRecent] = useState(() => {
     try {
       const r = JSON.parse(localStorage.getItem("recentSearches") || "[]");
@@ -38,7 +36,6 @@ export function SearchProvider({ children }) {
     localStorage.removeItem("recentSearches");
   }, []);
 
-  // Theme
   const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
   useEffect(() => {
     document.body.classList.toggle("dark", dark);
@@ -49,11 +46,9 @@ export function SearchProvider({ children }) {
 
   const resetSearch = useCallback(() => {
     setQuery("");
-    // optional: also reset filters
-    // setFilters(defaultFilters);
   }, []);
 
-  const resetFilters = useCallback(() => setFilters(defaultFilters), []);
+  const resetFilters = useCallback(() => setFilters(defaultFilters), [defaultFilters]);
 
   const value = useMemo(
     () => ({
